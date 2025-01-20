@@ -1,0 +1,50 @@
+# Homebrew configuration
+export HOMEBREW_PREFIX="~/usr/local"
+export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_NO_ENV_HINTS=1
+
+export PATH="${HOME}/.homebrew/bin":"${HOMEBREW_PREFIX}/bin":$PATH
+
+# GPG Stuff
+export GPG_TTY="$(tty)"
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+
+# GO stuff
+export GOPATH="${HOME}/.go"
+export PATH="${PATH}":"${GOPATH}/bin"
+
+# Sane Defaults
+export EDITOR=$(brew --prefix)/bin/nvim
+setopt AUTO_CD
+setopt MULTIOS
+setopt AUTO_PUSHD
+setopt GLOB_COMPLETE
+setopt AUTO_NAME_DIRS
+setopt PUSHD_MINUS
+setopt PUSHD_TO_HOME
+setopt RM_STAR_WAIT
+setopt ZLE
+setopt NO_HUP
+setopt EXTENDED_GLOB
+
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
+
+# Antigen
+source $(brew --prefix)/share/antigen/antigen.zsh
+antigen use oh-my-zsh
+
+## Bundles
+antigen bundle brew
+antigen bundle git
+antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle zsh-users/zsh-syntax-highlighting
+antigen bundle zsh-users/zsh-completions
+antigen bundle zsh-users/zsh-history-substring-search ./zsh-history-substring-search.zsh
+antigen bundle tmux
+antigen bundle djui/alias-tips
+antigen apply
+
+# starship
+eval "$(starship init zsh)"
