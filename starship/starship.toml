@@ -2,3 +2,47 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 add_newline = true
+
+[aws]
+format = 'on [$symbol($profile )(\($region\) )]($style)'
+style = 'bold blue'
+symbol = '🅰 '
+[aws.region_aliases]
+us-west-2 = 'pdx'
+ap-southeast-2 = 'au'
+us-east-1 = 'va'
+[aws.profile_aliases]
+CompanyGroupFrobozzOnCallAccess = 'Frobozz'
+
+
+[gcloud]
+symbol = '️🇬️ '
+format = 'on [$symbol$account(@$domain)(\($project\))]($style) '
+[gcloud.region_aliases]
+us-central1 = 'uc1'
+asia-northeast1 = 'an1'
+[gcloud.project_aliases]
+very-long-project-name = 'vlpn'
+
+[battery]
+full_symbol = '🔋 '
+charging_symbol = '⚡️ '
+discharging_symbol = '💀 '
+
+
+[buf]
+symbol = '🦬 '
+
+[docker_context]
+format = 'via [🐋 $context](blue bold)'
+
+[golang]
+format = 'via [$symbol($version )($mod_version )]($style)'
+
+
+[kubernetes]
+format = 'on [⛵ ($user on )($cluster in )$context \($namespace\)](dimmed green) '
+disabled = false
+
+[pulumi]
+format = '[🛥 ($version )$stack]($style) '
