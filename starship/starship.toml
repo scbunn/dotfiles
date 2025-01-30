@@ -2,33 +2,27 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 add_newline = true
+format = """$character"""
+right_format = """$all"""
+
+[os]
+disabled = false
 
 [aws]
 format = 'on [$symbol($profile )(\($region\) )]($style)'
 style = 'bold blue'
-symbol = '🅰 '
-[aws.region_aliases]
-us-west-2 = 'pdx'
-ap-southeast-2 = 'au'
-us-east-1 = 'va'
-[aws.profile_aliases]
-CompanyGroupFrobozzOnCallAccess = 'Frobozz'
-
+symbol = '🅰  '
 
 [gcloud]
 symbol = '️🇬️ '
 format = 'on [$symbol$account(@$domain)(\($project\))]($style) '
-[gcloud.region_aliases]
-us-central1 = 'uc1'
-asia-northeast1 = 'an1'
-[gcloud.project_aliases]
-very-long-project-name = 'vlpn'
+disabled = false
+
 
 [battery]
 full_symbol = '🔋 '
 charging_symbol = '⚡️ '
 discharging_symbol = '💀 '
-
 
 [buf]
 symbol = '🦬 '
@@ -39,10 +33,14 @@ format = 'via [🐋 $context](blue bold)'
 [golang]
 format = 'via [$symbol($version )($mod_version )]($style)'
 
-
 [kubernetes]
-format = 'on [⛵ ($user on )($cluster in )$context \($namespace\)](dimmed green) '
+format = 'on [⛵ ($context)](dimmed green) '
 disabled = false
+contexts = [
+  { context_pattern = "cip-(?P<team>[a-z]+)-(?P<cloud>[a-z]+)-(?P<env>[a-z]+)-(?P<region>.*)-(?P<cluster>.*)$", context_alias = "$cloud/$region/$cluster [$env] ($team)"},
+  { context_pattern = "gke_.(?P<project>.*)_(?P<region>.*)_gcp-(?P<env>.*)-(?P<cregion>.*-.*)-(?P<cluster>[\\w-]+)", context_alias = "gke/$region/$cluster [$env]"},
+]
+
 
 [pulumi]
 format = '[🛥 ($version )$stack]($style) '

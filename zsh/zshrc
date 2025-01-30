@@ -4,11 +4,12 @@ export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
 export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_NO_ENV_HINTS=1
 
-export PATH="${HOME}/.homebrew/bin":"${HOMEBREW_PREFIX}/bin":$PATH
+export PATH="${HOME}/bin":"${HOME}/.homebrew/bin":"${HOMEBREW_PREFIX}/bin":"${HOME}/.homebrew/opt/coreutils/libexec/gnubin":$PATH
 
 # GPG Stuff
 export GPG_TTY="$(tty)"
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
 
 # GO stuff
 export GOPATH="${HOME}/.go"
@@ -18,15 +19,15 @@ export PATH="${PATH}":"${GOPATH}/bin"
 export EDITOR=$(brew --prefix)/bin/nvim
 setopt AUTO_CD
 setopt MULTIOS
-setopt AUTO_PUSHD
-setopt GLOB_COMPLETE
-setopt AUTO_NAME_DIRS
-setopt PUSHD_MINUS
-setopt PUSHD_TO_HOME
 setopt RM_STAR_WAIT
-setopt ZLE
 setopt NO_HUP
-setopt EXTENDED_GLOB
+setopt BANG_HIST
+setopt EXTENDED_HISTORY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
 
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
@@ -48,3 +49,78 @@ antigen apply
 
 # starship
 eval "$(starship init zsh)"
+
+# fzf
+source <(fzf --zsh)
+# Open in tmux popup if on tmux, otherwise use --height mode
+export FZF_DEFAULT_OPTS='--style full --height 60% --tmux center,95%,85%'
+export FZF_DEAFULT_COMMAND='fd --type f --strip-cwd-prefix --hideen --follow --exclude .git'
+
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf --tmux center,80%,80% --preview 'tree -C {} | head -200'      "$@" ;;
+    export|unset) fzf --tmux center,80%,80% --preview "eval 'echo \$'{}"            "$@" ;;
+    tree)         find . -type d | fzf --tmux center,80%,80% --preview 'tree -C {}' "$@" ;;
+    *)            fzf --tmux center,80%,80% --preview 'bat -n --color=always {}'    "$@" ;;
+  esac
+}
+
+# Use fd (https://github.com/sharkdp/fd) for listing path candidates.
+# - The first argument to the function ($1) is the base path to start traversal
+# - See the source code (completion.{bash,zsh}) for the details.
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
+}
+
+# alias
+alias k="kubectl"
+
+if [ -f "${HOME}/.config/extras.zsh" ]; then . "${HOME}/.config/extras.zsh"; fi
+
+command -v fzf >/dev/null 2>&1 && { 
+	source <(kubectl completion zsh | sed 's#${requestComp} 2>/dev/null#${requestComp} 2>/dev/null | head -n -1 | fzf  --multi=0 #g')
+}
+
+function klogs() {
+stern . --color always 2>&1 |
+    fzf --ansi --tail 100000 --tac --no-sort --exact --wrap \
+        --bind 'ctrl-o:execute:vim -n <(kubectl logs {1})' \
+        --bind 'enter:execute:kubectl exec -it {1} -- bash' \
+        --header '╱ Enter (kubectl exec) ╱ CTRL-O (open log in vim) ╱'
+}
+
+function kd() {
+  kubectl get $1 --all-namespaces -o jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\n"}' | fzf --preview="echo '{}' | xargs kubectl describe $1 -n" | xargs kubectl describe $1 -n
+}
+
+function kgevents() {  kubectl get events --sort-by='.metadata.creationTimestamp'  }
+
+function gdiff() {
+  preview="git diff $@ --color=always -- {-1}"
+  git diff $@ --name-only | fzf -m --ansi --tmux center,100%,95% --preview $preview
+}
+
+if whence -w glog | grep "glog" > /dev/null; then
+  unalias glog
+fi
+
+function glog() {
+git log --graph --color \
+  --format='%Cred%h%Creset %G? %GT -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' \
+| fzf \
+  --ansi \
+  --reverse \
+  --no-sort \
+  --preview='
+    echo {} | grep -o "[a-f0-9]\{7\}" \
+    && git show --show-signature --color $(echo {} | grep -o "[a-f0-9]\{7\}")
+  '
+}
