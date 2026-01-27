@@ -11,6 +11,9 @@ export GPG_TTY="$(tty)"
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 gpgconf --launch gpg-agent
 
+# SOPS
+export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+
 # GO stuff
 export GOPATH="${HOME}/.go"
 export PATH="${PATH}":"${GOPATH}/bin"
@@ -124,3 +127,5 @@ git log --graph --color \
     && git show --show-signature --color $(echo {} | grep -o "[a-f0-9]\{7\}")
   '
 }
+
+ eval "$(direnv hook zsh)"   # or bash/fish
