@@ -90,3 +90,6 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 # Aliases
 alias ls='ls --color'
+
+# source an extras.zsh for environment specific zsh integrations
+if [ -f "${HOME}/.config/extras.zsh" ]; then . "${HOME}/.config/extras.zsh"; fi
