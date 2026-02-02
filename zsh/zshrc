@@ -93,3 +93,11 @@ alias ls='ls --color'
 
 # source an extras.zsh for environment specific zsh integrations
 if [ -f "${HOME}/.config/extras.zsh" ]; then . "${HOME}/.config/extras.zsh"; fi
+
+# Podman Docker API compatibility
+if command -v podman >/dev/null 2>&1; then
+  podman_sock="$(podman machine inspect --format '{{ .ConnectionInfo.PodmanSocket.Path }}' 2>/dev/null)"
+  if [[ -n "$podman_sock" ]]; then
+    export DOCKER_HOST="unix://$podman_sock"
+  fi
+fi
