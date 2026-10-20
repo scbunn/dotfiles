@@ -1,6 +1,7 @@
 #!/bin/sh
-# Point ~/Documents etc. at the cellar mounts. Never deletes anything: a real,
-# non-empty directory is left alone and reported (migrate it first, see docs/nfs.md).
+# Point ~/Documents and ~/Downloads at this user's cellar share. Never deletes
+# anything: a real, non-empty directory is left alone and reported (migrate it
+# first, see docs/nfs.md).
 set -eu
 . "$(dirname "$0")/nfs.conf"
 
@@ -20,14 +21,10 @@ link() { # name target
   ln -s "$target" "$path"; echo "linked $path -> $target"
 }
 
-[ -d "$MNT_ROOT/$USER" ] && ls "$MNT_ROOT/$USER" >/dev/null 2>&1 || { echo "$MNT_ROOT/$USER not mounted; aborting" >&2; exit 1; }
-
+ls "$MNT_ROOT/$USER" >/dev/null 2>&1 || { echo "$MNT_ROOT/$USER not mounted; aborting" >&2; exit 1; }
+for d in Documents Downloads; do
+  [ -d "$MNT_ROOT/$USER/$d" ] || { echo "missing $MNT_ROOT/$USER/$d on the NAS; create it first" >&2; exit 1; }
+done
 link Documents "$MNT_ROOT/$USER/Documents"
 link Downloads "$MNT_ROOT/$USER/Downloads"
-link Pictures  "$MNT_ROOT/$USER/Pictures"
-link Music     "$MNT_ROOT/media/Music"
-case "$(uname)" in
-  Darwin) link Movies "$MNT_ROOT/media/Movies" ;;
-  *)      link Videos "$MNT_ROOT/media/Movies" ;;
-esac
-# Desktop and Library are deliberately never linked.
+# Never linked: Desktop and Library (iCloud / app state), Pictures, Music, Movies.
