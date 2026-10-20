@@ -1,0 +1,4 @@
+# Point zsh at ~/.config/zsh; everything else lives there.
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+# zsh only reads one .zshenv, so load the real one ourselves
+[[ -r "$ZDOTDIR/.zshenv" ]] && source "$ZDOTDIR/.zshenv"

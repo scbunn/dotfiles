@@ -1,0 +1,8 @@
+README.md
+docs
+LICENSE
+.DS_Store
+.config/nvim/LICENSE
+.config/nvim/README.md
+.config/nvim/stylua.toml
+tools

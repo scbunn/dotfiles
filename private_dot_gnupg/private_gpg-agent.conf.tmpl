@@ -1,0 +1,14 @@
+default-cache-ttl 600
+max-cache-ttl 7200
+{{- $winPinentry := "/mnt/c/Program Files (x86)/GnuPG/bin/pinentry-basic.exe" }}
+{{- if eq .chezmoi.os "darwin" }}
+pinentry-program {{ .chezmoi.homeDir }}/.homebrew/bin/pinentry-mac
+{{- else if contains "microsoft" (.chezmoi.kernel.osrelease | lower) }}
+{{- if stat $winPinentry }}
+pinentry-program {{ $winPinentry }}
+{{- else }}
+pinentry-program /usr/bin/pinentry-tty
+{{- end }}
+{{- end }}
+enable-ssh-support
+use-standard-socket

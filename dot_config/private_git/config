@@ -1,6 +1,6 @@
+# identity, url rewrites and per-folder includeIf rules live in the private repo
 [include]
-  path = ~/.config/git.userinfo
-  path = ~/.config/git.rewrites
+  path = ~/.local/share/dotfiles-private/gitconfig
 
 [filter "lfs"]
 	process = git-lfs filter-process
@@ -25,14 +25,18 @@
   edit = "!git ls-files --modified --other --exclude-standard | sort -u | fzf -0 --multi --preview 'git diff --color {}' | xargs -r $EDITOR -p"
   fixup = "!git log --oneline --no-decorate --no-merges | fzf -0 --preview 'git show --color=always --format=oneline {1}' | awk '{print $1}' | xargs -r git commit --fixup"
   resetm = "!git diff --name-only --cached | fzf -0 -m --preview 'git diff --color=always {-1}' | xargs -r git reset"
+	lgv = log --graph --decorate --show-signature --pretty=format:\"%C(auto)%h %Cgreen%G? %s %C(dim white)- %an (%cr)\"
+	logv = log --show-signature --format=fuller
+	log = log --show-signature --format=fuller
 
 [merge]
 	ff = only
-	conflicstyle = diff3
+	conflictstyle = diff3
 
 [push]
 	default = simple
 	followTags = true
+	autoSetupRemote = true
 
 [status]
 	showUntrackedFiles = all
@@ -78,3 +82,5 @@
 [pull]
 	ff = only
 
+[log]
+	showSignature = true

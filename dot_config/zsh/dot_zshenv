@@ -1,0 +1,47 @@
+# ~/.config/zsh/.zshenv  (based on github.com/radleylewis/zsh)
+
+# ---------- XDG base directories ----------
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+# ---------- Editor ----------
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# ---------- Pager ----------
+if command -v bat >/dev/null 2>&1; then
+  export MANPAGER="bat -l man -p"
+elif command -v batcat >/dev/null 2>&1; then
+  export MANPAGER="batcat -l man -p"
+fi
+
+# ---------- bat theme ----------
+export BAT_THEME="gruvbox-dark"
+
+# ---------- GPG ----------
+export GPG_TTY=$(tty)
+
+# ---------- Starship ----------
+export STARSHIP_CONFIG="$ZDOTDIR/starship.toml"
+
+# ---------- Homebrew (user-local install) ----------
+if [[ -d "$HOME/.homebrew" ]]; then
+  export HOMEBREW_PREFIX="$HOME/.homebrew"
+  export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
+  export HOMEBREW_NO_ANALYTICS=1
+  export HOMEBREW_NO_ENV_HINTS=1
+fi
+
+# ---------- Go ----------
+export GOPATH="$HOME/.go"
+
+# ---------- Last.fm now-playing in tmux (API key lives in ~/.envrc) ----------
+export LASTFM_USER=scbunn
+
+# ---------- SOPS: age key lives on the shared Documents mount ----------
+export SOPS_AGE_KEY_FILE="$HOME/Documents/secrets/sops/age/keys.txt"
+
+# ---------- PATH (also re-run from .zprofile, see path.zsh) ----------
+source "$ZDOTDIR/path.zsh"
