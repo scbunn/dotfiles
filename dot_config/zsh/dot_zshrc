@@ -61,6 +61,10 @@ zstyle ':completion:*' menu no
 # Example: "doc" can complete to "Documents"
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'  # lowercase input matches upper and lower
 
+# kubectl / flux completions, only if installed (must come after compinit)
+(( $+commands[kubectl] )) && source <(kubectl completion zsh)
+(( $+commands[flux] )) && source <(flux completion zsh)
+
 # Initialize zoxide (after compinit, so `z foo<space><Tab>` completion registers)
 eval "$(zoxide init zsh)"
 
