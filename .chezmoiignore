@@ -6,3 +6,4 @@ LICENSE
 .config/nvim/README.md
 .config/nvim/stylua.toml
 tools
+themes
