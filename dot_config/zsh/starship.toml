@@ -28,6 +28,10 @@ bright-white = '#fbf1c7'
 [os]
 disabled = false
 
+# starship's default CachyOS glyph renders as a stray ribbon here; use the Arch logo
+[os.symbols]
+CachyOS = ' '
+
 [aws]
 format = 'on [$symbol($profile )(\($region\) )]($style)'
 style = 'bold blue'
