@@ -1,172 +1,92 @@
-# GPG Setup (macOS and Linux)
+# GPG setup (macOS, Linux, WSL)
 
 Based on: https://alexnorell.com/post/set-up-gpg/
 
-Sets up GPG for two purposes:
+GPG is used for two things:
 - **Git commit and tag signing**
-- **SSH authentication** (replaces ssh-agent)
+- **SSH authentication** (gpg-agent replaces ssh-agent)
 
-Private keys are stored in 1Password:
-- `master-secret-key.gpg` — primary/master key
-- `sub-secret-keys.gpg` — signing and authentication subkeys
+The keys are one primary key plus a signing subkey and an authentication subkey. Keep
+an offline backup of both exports (for example in a password manager):
+- `master-secret-key.gpg`: primary key
+- `sub-secret-keys.gpg`: signing and authentication subkeys
 
----
+## What chezmoi sets up
 
-## Installation
+Nothing here needs to be added by hand:
 
-```bash
-brew install gnupg pinentry-mac
-```
+- `~/.gnupg/gpg-agent.conf` (a template) turns on SSH support and picks the pinentry:
+  `pinentry-mac` on macOS, `pinentry-qt` on Linux (falls back to `pinentry-tty`), and
+  the Windows GnuPG `pinentry-basic.exe` on WSL when it is installed. On Linux, do not
+  use the `/usr/bin/pinentry` wrapper: under Hyprland it picks `pinentry-gnome3`, which
+  needs GNOME services to show a prompt.
+- `.zshenv` sets `GPG_TTY` and points `SSH_AUTH_SOCK` at the agent with
+  `gpgconf --list-dirs agent-ssh-socket`. That is `~/.gnupg/` on macOS and
+  `/run/user/$UID/gnupg/` on systemd Linux, where a socket unit starts gpg-agent.
 
----
+## Packages
 
-## Restoring on a New Machine
+| OS | Install |
+|----|---------|
+| macOS | `brew install gnupg pinentry-mac` |
+| Arch | `sudo pacman -S --needed gnupg pinentry pcsclite` |
+| Fedora | `sudo dnf install gnupg2 pinentry` |
+| Debian / WSL | `sudo apt install gnupg pinentry-tty` |
 
-This is the common case — keys already exist in 1Password.
-
-### 1. Configure pinentry-mac
-
-```bash
-echo "pinentry-program $(which pinentry-mac)" >> ~/.gnupg/gpg-agent.conf
-echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
-echo "use-standard-socket" >> ~/.gnupg/gpg-agent.conf
-gpg-connect-agent reloadagent /bye
-```
-
-### 2. Import keys from 1Password
-
-Export both files from 1Password, then:
-
-```bash
-gpg --import master-secret-key.gpg
-gpg --import sub-secret-keys.gpg
-```
-
-Set ultimate trust on the primary key:
-
-```bash
-gpg --list-secret-keys   # get your key fingerprint
-gpg --edit-key <FINGERPRINT>
-# at the gpg> prompt:
-trust
-# choose 5 (ultimate)
-quit
-```
-
-### 3. Register the authentication subkey for SSH
-
-Find the keygrip of the `[A]` subkey:
-
-```bash
-gpg --list-secret-keys --with-keygrip
-```
-
-Add it to sshcontrol:
-
-```bash
-echo "<KEYGRIP_OF_AUTH_SUBKEY>" >> ~/.gnupg/sshcontrol
-```
-
-### 4. Configure shell (zsh)
-
-Add to `~/.zshrc` (or `~/.config/extras.zsh`):
-
-```zsh
-export GPG_TTY="$(tty)"
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-gpgconf --launch gpg-agent
-```
-
-Reload your shell, then verify SSH key is available:
-
-```bash
-ssh-add -L
-# should print: ssh-ed25519 AAAA...
-```
-
-### 5. Configure git
-
-```bash
-git config --global commit.gpgsign true
-git config --global tag.gpgSign true
-git config --global user.signingkey <SIGNING_SUBKEY_FINGERPRINT>
-```
-
-The signing key is the last 16 hex chars of your `[S]` subkey fingerprint, or set the full fingerprint.
-
-### 6. Shred the exported key files
-
-```bash
-shred -uzv master-secret-key.gpg sub-secret-keys.gpg
-```
-
----
-
-## Restoring on Linux (Arch / CachyOS)
-
-Same keys, same steps as macOS. Only the differences are listed here.
-
-### Packages
-
-```bash
-sudo pacman -S --needed gnupg pinentry pcsclite
-```
-
-`pinentry` provides `pinentry-qt`, `pinentry-gnome3`, `-curses` and `-tty`.
-
-### Agent config and shell
-
-chezmoi handles both. Nothing to append by hand:
-
-- `gpg-agent.conf` (template) sets `pinentry-program /usr/bin/pinentry-qt`.
-  Do not use the `/usr/bin/pinentry` wrapper. On Hyprland it picks
-  `pinentry-gnome3`, which needs GNOME services to show a prompt.
-- `.zshenv` sets `SSH_AUTH_SOCK` from `gpgconf --list-dirs agent-ssh-socket`.
-  systemd starts gpg-agent from a socket unit, so the sockets are in
-  `/run/user/$UID/gnupg/`, not in `~/.gnupg/` as on macOS.
-
-Make sure the OpenSSH agent is not running, or it will own `SSH_AUTH_SOCK`:
+On Linux make sure the OpenSSH agent is not running, or it will own `SSH_AUTH_SOCK`:
 
 ```bash
 systemctl --user is-active ssh-agent.service   # should be inactive
 ```
 
-### Exported key files: keep them off NFS
+## Restore keys on a new machine
 
-`~/Downloads` may be a symlink to the NFS share on cellar. `shred` does not
-work on NFS or ZFS: ZFS writes changes to new blocks, and snapshots keep old
-copies. Move the exports to tmpfs before importing:
+The common case: the keys already exist in your backup.
+
+### 1. Put the exports somewhere safe
+
+`shred` only works on local, non-copy-on-write disks. If `~/Downloads` is on a network
+share, ZFS or btrfs, old copies can survive. Import from tmpfs instead:
 
 ```bash
-D=$(mktemp -d /run/user/$UID/gpgimport.XXXX)
+D=$(mktemp -d /run/user/$UID/gpgimport.XXXX)   # macOS: D=$(mktemp -d)
 mv ~/Downloads/master-secret-key.gpg ~/Downloads/sub-secret-keys.gpg "$D"/
+```
+
+### 2. Import and trust
+
+```bash
 gpg --batch --import "$D"/*.gpg
-rm -rf "$D"
+gpg --list-secret-keys --with-keygrip --with-subkey-fingerprints
+echo "<PRIMARY_FINGERPRINT>:6:" | gpg --import-ownertrust   # 6 = ultimate
 ```
 
-Trust and sshcontrol can be done without the interactive prompts:
+### 3. Expose the authentication subkey to SSH
+
+Add the keygrip of the `[A]` subkey from the listing above:
 
 ```bash
-echo "<PRIMARY_FINGERPRINT>:6:" | gpg --import-ownertrust
 echo "<KEYGRIP_OF_AUTH_SUBKEY>" >> ~/.gnupg/sshcontrol
-ssh-add -L
+ssh-add -L   # should print an ssh-ed25519 key
 ```
 
----
+### 4. Configure git
 
-## Fresh Setup (New Keys)
+Set `signingkey` in the private repo's `gitconfig` (see [git.md](git.md)), not with
+`git config --global`. Use the last 16 hex characters of the `[S]` subkey fingerprint,
+or the full fingerprint. Signing is already turned on in the shared config.
 
-Only do this if you don't have existing keys in 1Password.
-
-### 1. Install and configure pinentry-mac
+### 5. Remove the exports
 
 ```bash
-brew install gnupg pinentry-mac
-echo "pinentry-program $(which pinentry-mac)" >> ~/.gnupg/gpg-agent.conf
-gpg-connect-agent reloadagent /bye
+shred -uz "$D"/*.gpg 2>/dev/null; rm -rf "$D"
 ```
 
-### 2. Generate primary key
+## Fresh setup (new keys)
+
+Only if you do not have keys yet.
+
+### 1. Generate the primary key
 
 ```bash
 gpg --full-generate-key
@@ -176,37 +96,20 @@ Selections:
 - Type: `(9) ECC (sign and encrypt)`
 - Curve: `(1) Curve 25519`
 - Expiration: `1y`
-- Use a strong passphrase — store it in 1Password
-
-Export and store the fingerprint:
+- A strong passphrase, kept in your password manager
 
 ```bash
 export PRIMARY="<40_CHAR_FINGERPRINT>"
 ```
 
-### 3. Create subkeys
-
-Authentication subkey (for SSH):
+### 2. Create the subkeys
 
 ```bash
-gpg --quick-add-key $PRIMARY ed25519 auth 1y
+gpg --quick-add-key $PRIMARY ed25519 auth 1y   # SSH
+gpg --quick-add-key $PRIMARY ed25519 sign 1y   # git
 ```
 
-Signing subkey (for git):
-
-```bash
-gpg --quick-add-key $PRIMARY ed25519 sign 1y
-```
-
-### 4. Configure gpg-agent
-
-```bash
-echo "enable-ssh-support" >> ~/.gnupg/gpg-agent.conf
-echo "use-standard-socket" >> ~/.gnupg/gpg-agent.conf
-gpg-connect-agent reloadagent /bye
-```
-
-### 5. Register auth subkey for SSH
+### 3. Register the auth subkey for SSH
 
 ```bash
 gpg --list-secret-keys --with-keygrip $PRIMARY | \
@@ -215,76 +118,43 @@ gpg --list-secret-keys --with-keygrip $PRIMARY | \
   >> ~/.gnupg/sshcontrol
 ```
 
-### 6. Configure shell (zsh)
-
-```zsh
-export GPG_TTY="$(tty)"
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-gpgconf --launch gpg-agent
-```
-
-### 7. Configure git
+### 4. Find the signing key for git
 
 ```bash
-export SIGNING_KEY=$(
-  gpg --list-keys --with-subkey-fingerprints $PRIMARY | \
+gpg --list-keys --with-subkey-fingerprints $PRIMARY | \
   sed -n '/\[S\]/,+1p' | \
   awk '/^[[:space:]]+[0-9A-F]{40}/ {print $1}'
-)
-git config --global commit.gpgsign true
-git config --global tag.gpgSign true
-git config --global user.signingkey $SIGNING_KEY
 ```
 
-### 8. Publish keys to GitHub
+Put it in the private repo's `gitconfig` as `user.signingkey`.
 
-SSH key:
+### 5. Publish the public keys to GitHub
 
 ```bash
-ssh-add -L
-# paste output at https://github.com/settings/ssh/new
+ssh-add -L                    # paste at https://github.com/settings/ssh/new
+gpg --export --armor $PRIMARY # paste at https://github.com/settings/gpg/new
 ```
 
-GPG key:
+### 6. Back up and harden
 
 ```bash
-gpg --export --armor $PRIMARY
-# paste output at https://github.com/settings/gpg/new
-```
-
-### 9. Back up and harden
-
-Export keys for 1Password:
-
-```bash
-# Primary/master key
 gpg --export-secret-keys --armor $PRIMARY > master-secret-key.gpg
-
-# Subkeys only
 gpg --export-secret-subkeys --armor $PRIMARY > sub-secret-keys.gpg
 ```
 
-Store both files in 1Password, then delete the primary private key from the local keyring:
+Store both files in your backup, then delete the primary secret key from the local
+keyring (the subkeys stay) and remove the exports:
 
 ```bash
 gpg --delete-secret-keys $PRIMARY\!
-shred -uzv master-secret-key.gpg sub-secret-keys.gpg
+shred -uz master-secret-key.gpg sub-secret-keys.gpg
 ```
-
----
 
 ## Reference
 
 | File | Purpose |
 |------|---------|
-| `~/.gnupg/gpg-agent.conf` | Agent config: pinentry-mac, SSH support |
-| `~/.gnupg/gpg.conf` | GPG options |
-| `~/.gnupg/sshcontrol` | Keygrips of GPG subkeys exposed as SSH keys |
-| `1Password: master-secret-key.gpg` | Primary key backup |
-| `1Password: sub-secret-keys.gpg` | Subkey backup |
-
-Key fingerprints for this machine — find with:
-
-```bash
-gpg --list-secret-keys --with-keygrip --with-subkey-fingerprints
-```
+| `~/.gnupg/gpg-agent.conf` | agent config (managed by chezmoi): pinentry, SSH support |
+| `~/.gnupg/sshcontrol` | keygrips of subkeys exposed as SSH keys |
+| `master-secret-key.gpg` (backup) | primary key |
+| `sub-secret-keys.gpg` (backup) | subkeys |

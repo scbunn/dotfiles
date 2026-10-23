@@ -12,8 +12,8 @@ install scripts (to be written) should be built from this list.
 - WSL, Debian (apt); see WSL notes
 
 **Package names below are NOT yet verified** on Fedora, Debian, Arch or WSL. Only the
-brew column was checked (everything is installed on the first Mac). `?` means I am
-not sure it is packaged; the script should fall back to the upstream installer.
+brew column has been checked. `?` means it may not be packaged; fall back to the
+upstream installer.
 
 ## Core (required)
 
@@ -59,7 +59,9 @@ not sure it is packaged; the script should fall back to the upstream installer.
 | age | key for sops | `age` | `age` | `age` | `age` |
 | gh | GitHub CLI | `gh` | `gh` | `gh` | `github-cli` |
 
-The sops key lives at `~/Documents/secrets/sops/age/keys.txt` (on the NFS mount).
+`SOPS_AGE_KEY_FILE` (in `.zshenv`) expects the age key at
+`~/Documents/secrets/sops/age/keys.txt`; copy it there or override the variable in the
+private repo.
 
 ## Development
 
@@ -67,7 +69,7 @@ The sops key lives at `~/Documents/secrets/sops/age/keys.txt` (on the NFS mount)
 |------|-----|------|-----|-----|--------|
 | go | builds `tools/nowplaying` | `go` | `golang` | `golang` (may be old) | `go` |
 | kubectl, flux | completions loaded if present | `kubectl`, `fluxcd/tap/flux` | upstream | upstream | `kubectl`, `fluxcd` ? |
-| hledger | `LEDGER_FILE` (home) | `hledger` | `hledger` ? | `hledger` | `hledger` |
+| hledger | plain-text accounting; set `LEDGER_FILE` in the private repo | `hledger` | `hledger` ? | `hledger` | `hledger` |
 
 ## Platform notes
 
@@ -78,21 +80,14 @@ The sops key lives at `~/Documents/secrets/sops/age/keys.txt` (on the NFS mount)
 - **Clipboard in tmux** uses OSC 52. The terminal must allow it (iTerm2: Settings >
   General > Selection > "Applications in terminal may access clipboard").
 - **WSL:**
-  - Debian under WSL2. Enable systemd in `/etc/wsl.conf` (`[boot] systemd=true`) if mounts need it.
-  - NFS mounts from cellar need `nfs-common` inside WSL (not the Windows NFS client).
+  - Debian under WSL2. Enable systemd in `/etc/wsl.conf` (`[boot] systemd=true`) if needed.
   - Fonts and the terminal font are configured in Windows Terminal, not in WSL.
   - OSC 52 clipboard works in Windows Terminal; otherwise `clip.exe` is the fallback.
   - GPG: use `pinentry-tty` (no GUI pinentry inside WSL).
 
-## After install (manual, once per machine)
+## After install
 
-1. Clone the private repo to `~/.local/share/dotfiles-private` (home or work).
-2. `chezmoi init --apply --source ~/source/dotfiles` (or `chezmoi init --apply <public repo>`).
-3. Open a new shell (first run clones zsh plugins; needs network).
-4. `go build -o ~/.local/bin/nowplaying ./tools/nowplaying`
-5. Put `LASTFM_API_KEY` in `~/.envrc`, set `LASTFM_USER`, then `direnv allow ~`.
-6. Log in to GitHub per account: `GH_CONFIG_DIR=~/.config/gh-<account> gh auth login`
-7. Mount Documents / Downloads / Media from cellar (separate doc).
+See the steps in the [README](../README.md#set-up-a-new-machine).
 
 ## Open items
 

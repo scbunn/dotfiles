@@ -1,8 +1,11 @@
 # dotfiles
 
-Personal dotfiles for macOS, Linux (Fedora, Debian, Arch) and WSL, managed with
+Dotfiles for macOS, Linux (Fedora, Debian, Arch) and WSL, managed with
 [chezmoi](https://www.chezmoi.io/). This repo is public: it holds no secrets, and
-anything machine- or employer-specific lives in a separate private repo.
+anything personal, machine- or employer-specific lives in a separate private repo.
+
+The commands below use `scbunn/dotfiles`. To use these dotfiles yourself, fork the
+repo and replace that with your own fork.
 
 ## Set up a new machine
 
@@ -15,20 +18,67 @@ anything machine- or employer-specific lives in a separate private repo.
    ```
 
    This clones to `~/.local/share/chezmoi` and writes the dotfiles into `$HOME`.
-   Check first with `chezmoi init https://github.com/scbunn/dotfiles.git`
+   To check first, run `chezmoi init https://github.com/scbunn/dotfiles.git`,
    then `chezmoi diff`, and apply with `chezmoi apply`.
-3. Add the private repo, which holds the git identity and per-machine shell config
-   (`gitconfig`, `zsh/*.zsh`). Without it git has no identity and nothing extra is sourced:
+3. Add your private repo (see [The private repo](#the-private-repo)). Without it git
+   has no identity and no extra shell config is loaded:
 
    ```sh
    git clone <your-private-repo-url> ~/.local/share/dotfiles-private
    ```
 
-   Use a separate private repo for work and for home.
 4. Open a new terminal. The first run clones the zsh plugins, so it needs network.
-5. Build the status-bar tool: `go build -o ~/.local/bin/nowplaying ./tools/nowplaying`
-   from the chezmoi source directory (`chezmoi source-path`).
-6. Restore GPG keys for signing: [docs/gnupg.md](docs/gnupg.md).
+5. Restore or create GPG keys for commit signing and SSH: [docs/gnupg.md](docs/gnupg.md).
+6. Optional extras:
+   - Build the tmux now-playing tool from the source directory (`chezmoi cd`):
+     `go build -o ~/.local/bin/nowplaying ./tools/nowplaying`. It needs `LASTFM_USER`
+     and `LASTFM_API_KEY`; put the key in `~/.envrc` and run `direnv allow ~`.
+   - For more than one GitHub account, log in to each with its own config directory:
+     `GH_CONFIG_DIR=~/.config/gh-<account> gh auth login`.
+   - Linux desktop only: install the files under `system/` by hand (see the comment at
+     the top of each file).
+
+## The private repo
+
+The public config reads two things from `~/.local/share/dotfiles-private`:
+
+| Path | Read by | Holds |
+|------|---------|-------|
+| `gitconfig` | `~/.config/git/config` (`[include]`) | `[user]` name, email, signing key; `includeIf` rules; URL rewrites |
+| `zsh/*.zsh` | end of `.zshrc` | per-machine environment variables, aliases, functions |
+
+A minimal one:
+
+```
+dotfiles-private/
+├── gitconfig
+└── zsh/
+    └── local.zsh
+```
+
+```ini
+# gitconfig
+[user]
+	name = Your Name
+	email = you@example.com
+	signingkey = <SIGNING_SUBKEY_ID>
+
+# a different identity for one folder (path is relative to this file)
+[includeIf "gitdir:~/source/other-project/"]
+	path = other-project.gitconfig
+```
+
+Use a separate private repo for each context (for example home and work), and never
+commit keys or tokens to it. See [docs/git.md](docs/git.md) for more about the git setup.
+
+## Values to change for your own use
+
+These are tracked in this repo and name the original owner:
+
+| File | Value |
+|------|-------|
+| `dot_config/zsh/dot_zshenv` | `LASTFM_USER` |
+| `system/polkit-1/rules.d/50-noctalia-greeter-sync.rules` | the user allowed to sync the greeter |
 
 ## Day to day
 
@@ -61,16 +111,17 @@ ln -sn ~/source/dotfiles-private ~/.local/share/dotfiles-private
 
 | Path | Purpose |
 |------|---------|
-| `dot_config/` | files for `~/.config` (zsh, nvim, tmux, git, starship, eza, kitty, hypr) |
+| `dot_config/` | files for `~/.config` (zsh, nvim, tmux, git, starship, eza, kitty, hypr, noctalia) |
 | `dot_zshenv` | sets `ZDOTDIR` so zsh reads `~/.config/zsh` |
 | `private_dot_gnupg/` | gpg-agent config (a template: picks the pinentry per OS) |
-| `tools/` | not installed by chezmoi; `nowplaying` (Go) and `nfs` scripts |
-| `docs/` | install requirements, GPG, git, NFS |
+| `system/` | not installed by chezmoi; system files (polkit rule) installed by hand with sudo |
+| `tools/` | not installed by chezmoi; `nowplaying` (Go) for the tmux status bar |
+| `docs/` | install requirements, GPG, git |
 | `themes/` | not installed by chezmoi; terminal themes imported by hand (iTerm2) |
 
 ### Linux-only configs
 
-Linux desktop configs (kitty, Hyprland) are skipped on macOS and WSL.
+Linux desktop configs (kitty, Hyprland, Noctalia) are skipped on macOS and WSL.
 The list lives in the `$linuxDesktop` block at the end of `.chezmoiignore`;
 add each new Linux-only path there.
 
