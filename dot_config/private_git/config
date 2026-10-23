@@ -73,7 +73,7 @@
 	newHighlight = green bold 22
 
 [core]
-  editor=~/.homebrew/bin/nvim
+	editor = nvim
 	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
 	excludesfile = ~/.gitignore
 	pager = diff-so-fancy | less --tabs=2 -RFX
