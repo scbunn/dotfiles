@@ -1,6 +1,8 @@
 -- Workspace rules wiki https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 -- Add your workspace rules here. Increment the workspace number as you go. Do not have duplicate workspaces.
-hl.workspace_rule({ workspace = "name:gaming", monitor = PRIMARY_MONITOR, default = true })
+-- Games are sent here by windowrules.lua. Not default: the monitor would start on it instead of 1.
+-- The name is the bar label, so it is an emoji like 1-3 below.
+hl.workspace_rule({ workspace = "name:🎮", monitor = PRIMARY_MONITOR })
 -- 1: daily driving (browser), 2: development (editor, terminals), 3: music and chat.
 -- default_name is what the Noctalia workspaces widget shows as the label (label_source = "name").
 -- Use single-codepoint emoji (no U+FE0F variation selector) so they fit max_label_chars.

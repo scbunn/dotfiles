@@ -94,11 +94,11 @@ where you push: `git remote set-url origin git@github.com:scbunn/dotfiles.git`.
 
 ## Using a checkout somewhere other than the default
 
-If the repo is cloned elsewhere (for example `~/source/dotfiles`), tell chezmoi in
-`~/.config/chezmoi/chezmoi.toml`:
+If the repo is cloned elsewhere (for example `~/source/dotfiles`), point chezmoi at it
+once; `.chezmoi.toml.tmpl` then keeps `sourceDir` in `~/.config/chezmoi/chezmoi.toml`:
 
-```toml
-sourceDir = "~/source/dotfiles"
+```sh
+chezmoi init --source ~/source/dotfiles
 ```
 
 The private repo path is fixed, so for a checkout elsewhere symlink it into place:
@@ -112,9 +112,10 @@ ln -sn ~/source/dotfiles-private ~/.local/share/dotfiles-private
 | Path | Purpose |
 |------|---------|
 | `dot_config/` | files for `~/.config` (zsh, nvim, tmux, git, starship, eza, kitty, hypr, noctalia) |
+| `.chezmoitemplates/` | not installed; per-machine Hyprland monitor profiles |
 | `dot_zshenv` | sets `ZDOTDIR` so zsh reads `~/.config/zsh` |
 | `private_dot_gnupg/` | gpg-agent config (a template: picks the pinentry per OS) |
-| `system/` | not installed by chezmoi; system files (polkit rule) installed by hand with sudo |
+| `system/` | not installed by chezmoi; system files (polkit rule, NVIDIA modprobe options) installed by hand with sudo |
 | `tools/` | not installed by chezmoi; `nowplaying` (Go) for the tmux status bar |
 | `docs/` | install requirements, GPG, git |
 | `themes/` | not installed by chezmoi; terminal themes imported by hand (iTerm2) |
@@ -124,6 +125,17 @@ ln -sn ~/source/dotfiles-private ~/.local/share/dotfiles-private
 Linux desktop configs (kitty, Hyprland, Noctalia) are skipped on macOS and WSL.
 The list lives in the `$linuxDesktop` block at the end of `.chezmoiignore`;
 add each new Linux-only path there.
+
+### Monitor profiles
+
+`~/.config/hypr/config/monitors.lua` is built from one of
+`.chezmoitemplates/hypr/monitors/<profile>.lua`: `desktop` (Alienware AW3423DW),
+`laptop` (built-in panel) or `auto` (every output at its preferred mode). `chezmoi init`
+asks for the profile once on a Linux desktop and stores it as `monitor_profile` in
+`~/.config/chezmoi/chezmoi.toml`. To switch, change that value and run `chezmoi apply`.
+For a new machine, add a profile file and add its name to the list in `.chezmoi.toml.tmpl`.
+
+The NVIDIA lines in `environment.lua` are added only when `nvidia-smi` is installed.
 
 ### Noctalia
 

@@ -1,0 +1,9 @@
+{{- /* Generates ~/.config/chezmoi/chezmoi.toml on `chezmoi init`. Answers are asked once and kept. */ -}}
+{{- $linuxDesktop := and (eq .chezmoi.os "linux") (not (contains "microsoft" (.chezmoi.kernel.osrelease | lower))) -}}
+sourceDir = {{ .chezmoi.sourceDir | quote }}
+{{- if $linuxDesktop }}
+
+[data]
+# Which .chezmoitemplates/hypr/monitors/<profile>.lua becomes ~/.config/hypr/config/monitors.lua
+monitor_profile = {{ promptChoiceOnce . "monitor_profile" "Monitor profile" (list "desktop" "laptop" "auto") "auto" | quote }}
+{{- end }}

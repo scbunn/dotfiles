@@ -130,7 +130,7 @@ wallpaper_scheme = "m3-tonal-spot"
 
 [wallpaper]
 # rotate through every image in this folder, one per hour
-directory = "~/Pictures/wallpaper"
+directory = "~/Documents/wallpaper"
 
     [wallpaper.automation]
     enabled = true

@@ -1,0 +1,10 @@
+-- Environmental variables (for reference https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/)
+-- if you use UWSM, define your variables in ~/.config/uwsm/env
+-- if you don't use UWSM, define your variables here (e.g. hl.env("QT_QPA_PLATFORM", "wayland"))
+{{- if lookPath "nvidia-smi" }}
+
+-- NVIDIA (added by chezmoi because nvidia-smi is installed)
+hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia") -- use the NVIDIA GLX vendor library for XWayland apps
+hl.env("LIBVA_DRIVER_NAME", "nvidia") -- VA-API video decode via libva-nvidia-driver
+hl.env("NVD_BACKEND", "direct") -- backend libva-nvidia-driver needs on current drivers
+{{- end }}
