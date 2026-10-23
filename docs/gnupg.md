@@ -1,4 +1,4 @@
-# GPG Setup on macOS
+# GPG Setup (macOS and Linux)
 
 Based on: https://alexnorell.com/post/set-up-gpg/
 
@@ -98,6 +98,58 @@ The signing key is the last 16 hex chars of your `[S]` subkey fingerprint, or se
 
 ```bash
 shred -uzv master-secret-key.gpg sub-secret-keys.gpg
+```
+
+---
+
+## Restoring on Linux (Arch / CachyOS)
+
+Same keys, same steps as macOS. Only the differences are listed here.
+
+### Packages
+
+```bash
+sudo pacman -S --needed gnupg pinentry pcsclite
+```
+
+`pinentry` provides `pinentry-qt`, `pinentry-gnome3`, `-curses` and `-tty`.
+
+### Agent config and shell
+
+chezmoi handles both. Nothing to append by hand:
+
+- `gpg-agent.conf` (template) sets `pinentry-program /usr/bin/pinentry-qt`.
+  Do not use the `/usr/bin/pinentry` wrapper. On Hyprland it picks
+  `pinentry-gnome3`, which needs GNOME services to show a prompt.
+- `.zshenv` sets `SSH_AUTH_SOCK` from `gpgconf --list-dirs agent-ssh-socket`.
+  systemd starts gpg-agent from a socket unit, so the sockets are in
+  `/run/user/$UID/gnupg/`, not in `~/.gnupg/` as on macOS.
+
+Make sure the OpenSSH agent is not running, or it will own `SSH_AUTH_SOCK`:
+
+```bash
+systemctl --user is-active ssh-agent.service   # should be inactive
+```
+
+### Exported key files: keep them off NFS
+
+`~/Downloads` may be a symlink to the NFS share on cellar. `shred` does not
+work on NFS or ZFS: ZFS writes changes to new blocks, and snapshots keep old
+copies. Move the exports to tmpfs before importing:
+
+```bash
+D=$(mktemp -d /run/user/$UID/gpgimport.XXXX)
+mv ~/Downloads/master-secret-key.gpg ~/Downloads/sub-secret-keys.gpg "$D"/
+gpg --batch --import "$D"/*.gpg
+rm -rf "$D"
+```
+
+Trust and sshcontrol can be done without the interactive prompts:
+
+```bash
+echo "<PRIMARY_FINGERPRINT>:6:" | gpg --import-ownertrust
+echo "<KEYGRIP_OF_AUTH_SUBKEY>" >> ~/.gnupg/sshcontrol
+ssh-add -L
 ```
 
 ---

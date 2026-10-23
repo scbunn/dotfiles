@@ -98,8 +98,6 @@ The sops key lives at `~/Documents/secrets/sops/age/keys.txt` (on the NFS mount)
 
 - Write `install/macos.sh`, `install/fedora.sh`, `install/debian.sh` (also used by WSL),
   `install/arch.sh` from the tables above, and verify the package names on each OS.
-- `gpg-agent.conf` hard-codes `pinentry-mac` and a macOS path. Make it a chezmoi
-  template (`.tmpl`) that picks the right pinentry per OS.
 - `.zshenv` assumes Homebrew only if `~/.homebrew` exists; fine on Linux, but confirm.
 - Decide whether `nowplaying` is built by a chezmoi `run_onchange_` script.
 - Oh My Zsh git aliases (`gst`, `gco`) were dropped; decide whether to bring any back.

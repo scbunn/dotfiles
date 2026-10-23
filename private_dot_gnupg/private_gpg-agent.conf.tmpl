@@ -9,6 +9,12 @@ pinentry-program {{ $winPinentry }}
 {{- else }}
 pinentry-program /usr/bin/pinentry-tty
 {{- end }}
+{{- else if eq .chezmoi.os "linux" }}
+{{- if stat "/usr/bin/pinentry-qt" }}
+pinentry-program /usr/bin/pinentry-qt
+{{- else }}
+pinentry-program /usr/bin/pinentry-tty
+{{- end }}
 {{- end }}
 enable-ssh-support
 use-standard-socket

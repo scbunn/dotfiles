@@ -7,3 +7,12 @@ LICENSE
 .config/nvim/stylua.toml
 tools
 themes
+system
+
+{{- /* Linux desktop only (not macOS, not WSL): add new Linux configs here */}}
+{{- $linuxDesktop := and (eq .chezmoi.os "linux") (not (contains "microsoft" (.chezmoi.kernel.osrelease | lower))) }}
+{{- if not $linuxDesktop }}
+.config/kitty
+.config/hypr
+.config/noctalia
+{{- end }}

@@ -51,12 +51,38 @@ If the repo is cloned elsewhere (for example `~/source/dotfiles`), tell chezmoi 
 sourceDir = "~/source/dotfiles"
 ```
 
+The private repo path is fixed, so for a checkout elsewhere symlink it into place:
+
+```sh
+ln -sn ~/source/dotfiles-private ~/.local/share/dotfiles-private
+```
+
 ## Layout
 
 | Path | Purpose |
 |------|---------|
-| `dot_config/` | files for `~/.config` (zsh, nvim, tmux, git, starship, eza) |
+| `dot_config/` | files for `~/.config` (zsh, nvim, tmux, git, starship, eza, kitty, hypr) |
 | `dot_zshenv` | sets `ZDOTDIR` so zsh reads `~/.config/zsh` |
 | `private_dot_gnupg/` | gpg-agent config (a template: picks the pinentry per OS) |
 | `tools/` | not installed by chezmoi; `nowplaying` (Go) and `nfs` scripts |
 | `docs/` | install requirements, GPG, git, NFS |
+| `themes/` | not installed by chezmoi; terminal themes imported by hand (iTerm2) |
+
+### Linux-only configs
+
+Linux desktop configs (kitty, Hyprland) are skipped on macOS and WSL.
+The list lives in the `$linuxDesktop` block at the end of `.chezmoiignore`;
+add each new Linux-only path there.
+
+### Noctalia
+
+Noctalia reads two files. `~/.config/noctalia/config.toml` is tracked and holds every
+setting. `~/.local/state/noctalia/settings.toml` is written by the Noctalia settings app,
+overrides `config.toml`, and is not tracked: it also stores the current wallpaper, which
+changes every hour.
+
+After changing something in the settings app, copy the new keys from `settings.toml`
+into `dot_config/noctalia/config.toml`, then delete them from `settings.toml` so it
+keeps only `config_version`, `[lockscreen_widgets]` and `[wallpaper.*]` paths.
+
+Wallpapers rotate hourly from `~/Pictures/wallpaper/` (not tracked; copy images there).

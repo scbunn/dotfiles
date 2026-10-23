@@ -1,0 +1,16 @@
+// Let Noctalia sync the login greeter's wallpaper and colors without a password.
+// Wallpapers rotate hourly and each change runs the greeter sync, which by default
+// asks for an admin password every time (auth_admin, no caching).
+//
+// Only this one action, only for scbunn, only from an active local session.
+// The action is pinned to `/usr/bin/noctalia-greeter-apply-appearance --sync`
+// by its policy (/usr/share/polkit-1/actions/org.noctalia.greeter.apply-appearance.policy).
+//
+// Install: sudo install -m 0644 -o root -g root \
+//   system/polkit-1/rules.d/50-noctalia-greeter-sync.rules /etc/polkit-1/rules.d/
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.noctalia.greeter.sync-appearance" &&
+        subject.user == "scbunn" && subject.local && subject.active) {
+        return polkit.Result.YES;
+    }
+});

@@ -1,0 +1,201 @@
+# Noctalia also reads ~/.local/state/noctalia/settings.toml, which the settings app
+# writes and which overrides this file. That file is runtime state (current wallpaper,
+# lockscreen layout) and is not tracked; copy settings you change in the app into here.
+
+[accessibility]
+ui_scale = 1.05
+
+[bar.default]
+border_width = 2.0
+center = [ "workspaces", "spacer_1", "battery" ]
+concave_edge_corners = true
+contact_shadow = true
+end = [ "tray", "notifications", "network", "volume", "session" ]
+margin_edge = 3
+margin_ends = 5
+margin_opposite_edge = 5
+padding = 10
+radius = 3
+radius_bottom_left = 3
+radius_bottom_right = 3
+radius_top_left = 3
+radius_top_right = 3
+scale = 1.10
+start = [ "clock", "spacer_1", "group:g1" ]
+thickness = 35
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    border = ""
+    border_width = 1.0
+    enabled = true
+    fill = "on_secondary"
+    id = "g1"
+    members = [ "temp" ]
+    opacity = 1.0
+    padding = 6.0
+
+[desktop_widgets]
+enabled = false
+
+[dock]
+active_monitor_only = true
+background_opacity = 1.0
+border_width = 3.0
+enabled = true
+icon_size = 32
+launcher_position = "end"
+magnification_scale = 2.0
+reserve_space = false
+show_dots = true
+smart_auto_hide = true
+
+[location]
+auto_locate = true
+
+[shell]
+clipboard_image_action_command = "swash --stdin --name \"swash-$(date +'%Y-%m-%d_%H:%M:%S').png\""
+launch_apps_as_systemd_services = true
+polkit_agent = true
+settings_show_advanced = true
+
+    [shell.greeter_sync]
+    auto_sync = true
+
+    [shell.launcher]
+    category_icons_only = true
+    compact = true
+    layout = "simple"
+
+    [shell.panel]
+    open_near_click_control_center = true
+    session_placement = "floating"
+    session_position = "center"
+
+    [shell.screenshot]
+    copy_to_clipboard = false
+    pipe_command = "swash --stdin --name \"swash-$(date +'%Y-%m-%d_%H:%M:%S').png\""
+    pipe_to_command = true
+    save_to_file = false
+
+    [[shell.session.actions]]
+    action = "lock"
+    countdown_seconds = 0.0
+    enabled = true
+    shortcut = "1"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "logout"
+    countdown_seconds = 0.0
+    enabled = true
+    shortcut = "2"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "lock_and_suspend"
+    countdown_seconds = 3.0
+    enabled = true
+    shortcut = "3"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "reboot"
+    countdown_seconds = 3.0
+    enabled = true
+    shortcut = "4"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "shutdown"
+    countdown_seconds = 3.0
+    enabled = true
+    shortcut = "5"
+    variant = "destructive"
+
+[system.monitor]
+gpu_poll_seconds = 2
+
+[theme]
+community_palette = "Gruvbox Material Hard"
+mode = "dark"
+source = "community"
+wallpaper_scheme = "m3-tonal-spot"
+
+    [theme.templates]
+    # no "kitty": kitty uses dot_config/kitty/themes/gruvbox-dark.conf, and the
+    # template appends an include to kitty.conf that overrides it
+    builtin_ids = [ "btop", "gtk3", "gtk4", "kcolorscheme", "qt", "alacritty" ]
+
+[wallpaper]
+# rotate through every image in this folder, one per hour
+directory = "~/Pictures/wallpaper"
+
+    [wallpaper.automation]
+    enabled = true
+    interval_seconds = 3600
+    order = "random"
+    recursive = false
+
+[widget.battery]
+hide_when_plugged = true
+
+[widget.clock]
+color = "secondary"
+format = "{:%H:%M %A %m/%d/%y}"
+
+[widget.launcher]
+color = "secondary"
+
+[widget.media]
+hide_when_no_media = true
+title_scroll = "on_hover"
+
+[widget.network]
+color = "secondary"
+
+[widget.notifications]
+color = "secondary"
+
+[widget.session]
+color = "error"
+
+[widget.spacer_1]
+type = "spacer"
+
+[widget.temp]
+show_value = false
+
+[widget.sysmon_2]
+glyph = "gpu-usage"
+show_value = false
+stat = "gpu_temp"
+type = "sysmon"
+
+[widget.sysmon_3]
+glyph = "cpu-2"
+stat = "ram_used"
+type = "sysmon"
+
+[widget.tray]
+capsule = true
+capsule_fill = "on_secondary"
+drawer = true
+
+[widget.volume]
+color = "secondary"
+
+[widget.workspaces]
+active_pill_size = 2.5
+capsule = false
+capsule_fill = "on_primary"
+style = "minimal"
+focused_color = "#d79921"
+occupied_color = "#ebdbb28c"
+empty_color = "#ebdbb24d"
+inactive_pill_size = 1.0
+pill_scale = 0.80
+show_labels = true
+label_source = "name"
+max_label_chars = 4
