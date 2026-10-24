@@ -24,6 +24,21 @@ Nothing here needs to be added by hand:
   `gpgconf --list-dirs agent-ssh-socket`. That is `~/.gnupg/` on macOS and
   `/run/user/$UID/gnupg/` on systemd Linux, where a socket unit starts gpg-agent.
 
+## Saving the passphrase in the keyring (Linux desktop)
+
+`pinentry-qt` can store the passphrase in gnome-keyring ("Save in password manager"),
+but only if the keyring is unlocked at login. Otherwise you get a keyring unlock prompt at
+login and a pinentry prompt on every use.
+
+- `system/pam.d/greetd` adds `pam_gnome_keyring` so greetd unlocks the keyring with your
+  login password: `sudo cp system/pam.d/greetd /etc/pam.d/greetd`
+- PAM only unlocks the keyring named `login`
+  (`~/.local/share/keyrings/login.keyring`), and its password must match your login
+  password.
+- `~/.local/share/dbus-1/services/org.freedesktop.secrets.service` routes Secret Service
+  activation to the systemd `gnome-keyring-daemon.service`. Without it, D-Bus can start a
+  second daemon that PAM never unlocked.
+
 ## Packages
 
 | OS | Install |

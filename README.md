@@ -37,6 +37,9 @@ repo and replace that with your own fork.
      `GH_CONFIG_DIR=~/.config/gh-<account> gh auth login`.
    - Linux desktop only: install the files under `system/` by hand (see the comment at
      the top of each file).
+   - Linux desktop only: re-select the avatar once in Noctalia's Control Center. Only
+     the picker hands it to AccountsService, where the login greeter reads it;
+     `avatar_path` in the config alone doesn't.
 
 ## The private repo
 

@@ -15,4 +15,5 @@ system
 .config/kitty
 .config/hypr
 .config/noctalia
+.local/share/dbus-1
 {{- end }}
