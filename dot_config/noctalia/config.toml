@@ -55,6 +55,7 @@ smart_auto_hide = true
 auto_locate = true
 
 [shell]
+avatar_path = "~/Documents/Images/Avatars/bunn avatar 2t.png"
 clipboard_image_action_command = "swash --stdin --name \"swash-$(date +'%Y-%m-%d_%H:%M:%S').png\""
 launch_apps_as_systemd_services = true
 polkit_agent = true
@@ -130,7 +131,7 @@ wallpaper_scheme = "m3-tonal-spot"
 
 [wallpaper]
 # rotate through every image in this folder, one per hour
-directory = "~/Documents/wallpaper"
+directory = "~/Documents/Images/Wallpaper"
 
     [wallpaper.automation]
     enabled = true
@@ -187,10 +188,13 @@ drawer = true
 color = "secondary"
 
 [widget.workspaces]
-active_pill_size = 2.5
+# rounded squares with the workspace name (its number, or G for games) inside: equal pill
+# sizes make each pill square, capsule_radius rounds its corners
+active_pill_size = 1.0
 capsule = false
 capsule_fill = "on_primary"
-style = "minimal"
+capsule_radius = 4
+style = "regular"
 focused_color = "#d79921"
 occupied_color = "#ebdbb28c"
 empty_color = "#ebdbb24d"
