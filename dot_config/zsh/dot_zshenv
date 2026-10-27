@@ -44,8 +44,8 @@ export GOPATH="$HOME/.go"
 # ---------- Last.fm now-playing in tmux (API key lives in ~/.envrc) ----------
 export LASTFM_USER=scbunn
 
-# ---------- SOPS: age key lives on the shared Documents mount ----------
-export SOPS_AGE_KEY_FILE="$HOME/Documents/secrets/sops/age/keys.txt"
+# ---------- SOPS: default age key location ----------
+export SOPS_AGE_KEY_FILE="$XDG_CONFIG_HOME/sops/age/keys.txt"
 
 # ---------- PATH (also re-run from .zprofile, see path.zsh) ----------
 source "$ZDOTDIR/path.zsh"

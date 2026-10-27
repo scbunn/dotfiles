@@ -54,14 +54,14 @@ upstream installer.
 | Tool | Why | brew | dnf | apt | pacman |
 |------|-----|------|-----|-----|--------|
 | gnupg | commit signing | `gnupg` | `gnupg2` | `gnupg` | `gnupg` |
-| pinentry | passphrase prompt (see open items) | `pinentry-mac` | `pinentry` | `pinentry-curses` / `pinentry-tty` | `pinentry` |
+| pinentry | passphrase prompt | `pinentry-mac` | `pinentry` | `pinentry-curses` / `pinentry-tty` | `pinentry` |
 | sops | encrypted secrets | `sops` | release binary ? | release binary ? | `sops` |
 | age | key for sops | `age` | `age` | `age` | `age` |
 | gh | GitHub CLI | `gh` | `gh` | `gh` | `github-cli` |
 
-`SOPS_AGE_KEY_FILE` (in `.zshenv`) expects the age key at
-`~/Documents/secrets/sops/age/keys.txt`; copy it there or override the variable in the
-private repo.
+If you use SOPS, `.zshenv` sets `SOPS_AGE_KEY_FILE` to the default age key location,
+`$XDG_CONFIG_HOME/sops/age/keys.txt` (`~/.config/sops/age/keys.txt`). Put your key
+there or override the variable.
 
 ## Development
 
@@ -69,7 +69,6 @@ private repo.
 |------|-----|------|-----|-----|--------|
 | go | builds `tools/nowplaying` | `go` | `golang` | `golang` (may be old) | `go` |
 | kubectl, flux | completions loaded if present | `kubectl`, `fluxcd/tap/flux` | upstream | upstream | `kubectl`, `fluxcd` ? |
-| hledger | plain-text accounting; set `LEDGER_FILE` in the private repo | `hledger` | `hledger` ? | `hledger` | `hledger` |
 
 ## Platform notes
 
@@ -88,11 +87,3 @@ private repo.
 ## After install
 
 See the steps in the [README](../README.md#set-up-a-new-machine).
-
-## Open items
-
-- Write `install/macos.sh`, `install/fedora.sh`, `install/debian.sh` (also used by WSL),
-  `install/arch.sh` from the tables above, and verify the package names on each OS.
-- `.zshenv` assumes Homebrew only if `~/.homebrew` exists; fine on Linux, but confirm.
-- Decide whether `nowplaying` is built by a chezmoi `run_onchange_` script.
-- Oh My Zsh git aliases (`gst`, `gco`) were dropped; decide whether to bring any back.
