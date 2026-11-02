@@ -1,0 +1,10 @@
+{{- if and (eq .chezmoi.os "linux") (not (contains "microsoft" (.chezmoi.kernel.osrelease | lower))) -}}
+#!/bin/sh
+# Re-runs when the units change.
+# upstream.timer: {{ include "dot_config/systemd/user/dotfiles-upstream-check.timer" | sha256sum }}
+# unpushed.timer: {{ include "dot_config/systemd/user/dotfiles-unpushed-check.timer" | sha256sum }}
+# upstream.service: {{ include "dot_config/systemd/user/dotfiles-upstream-check.service" | sha256sum }}
+# unpushed.service: {{ include "dot_config/systemd/user/dotfiles-unpushed-check.service" | sha256sum }}
+systemctl --user daemon-reload
+systemctl --user enable --now dotfiles-upstream-check.timer dotfiles-unpushed-check.timer
+{{- end }}

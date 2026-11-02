@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily check for unpushed dotfiles changes
+
+[Timer]
+OnCalendar=*-*-* 10:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

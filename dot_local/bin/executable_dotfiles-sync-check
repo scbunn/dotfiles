@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Desktop notification when the dotfiles repo is out of sync with origin.
+#   dotfiles-sync-check upstream   origin has commits not in the local branch (fetches first)
+#   dotfiles-sync-check unpushed   local commits or uncommitted changes not on origin
+# Run by the dotfiles-*-check systemd user timers.
+set -euo pipefail
+
+mode="${1:-}"
+repo="${DOTFILES_DIR:-$(chezmoi source-path)}"
+cd "$repo"
+
+notify() {
+  notify-send --app-name=dotfiles --icon=git "$1" "$2"
+}
+
+case "$mode" in
+  upstream)
+    # Fetch over HTTPS so it works without an SSH agent (public repo).
+    git -c 'url.https://github.com/.insteadOf=git@github.com:' fetch --quiet origin
+    behind=$(git rev-list --count 'HEAD..@{upstream}')
+    if (( behind > 0 )); then
+      notify "Dotfiles: upstream changes" \
+        "$behind new commit(s) on $(git rev-parse --abbrev-ref '@{upstream}'). Pull and run chezmoi apply."
+    fi
+    ;;
+  unpushed)
+    ahead=$(git rev-list --count '@{upstream}..HEAD')
+    dirty=$(git status --porcelain | wc -l)
+    if (( ahead > 0 || dirty > 0 )); then
+      notify "Dotfiles: local changes not pushed" \
+        "$ahead unpushed commit(s), $dirty uncommitted file(s) in $repo"
+    fi
+    ;;
+  *)
+    echo "usage: $(basename "$0") upstream|unpushed" >&2
+    exit 2
+    ;;
+esac

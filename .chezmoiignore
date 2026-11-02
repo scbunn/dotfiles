@@ -16,4 +16,6 @@ system
 .config/hypr
 .config/noctalia
 .local/share/dbus-1
+.local/bin/dotfiles-sync-check
+.config/systemd/user/dotfiles-*
 {{- end }}
