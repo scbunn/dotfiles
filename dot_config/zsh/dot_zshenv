@@ -24,16 +24,23 @@ export BAT_THEME="gruvbox-dark"
 export GPG_TTY=$(tty)
 # gpg-agent doubles as the ssh-agent (enable-ssh-support in gpg-agent.conf).
 # Replaces the Oh My Zsh gpg-agent plugin; set here so non-interactive ssh/git see it too.
-# Ask gpgconf: ~/.gnupg on macOS, /run/user/$UID/gnupg on systemd Linux.
-export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+# SSH_AUTH_SOCK is set after PATH (bottom of file) so Homebrew's gpgconf is found.
 
 # ---------- Starship ----------
 export STARSHIP_CONFIG="$ZDOTDIR/starship.toml"
 
-# ---------- Homebrew (user-local install) ----------
-if [[ -d "$HOME/.homebrew" ]]; then
+# ---------- Homebrew ----------
+# User-local install (~/.homebrew, older Macs) wins; otherwise the standard
+# prefix: /opt/homebrew (Apple Silicon) or /usr/local (Intel).
+if [[ -x "$HOME/.homebrew/bin/brew" ]]; then
   export HOMEBREW_PREFIX="$HOME/.homebrew"
   export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
+elif [[ -x /opt/homebrew/bin/brew ]]; then
+  export HOMEBREW_PREFIX=/opt/homebrew
+elif [[ -x /usr/local/bin/brew ]]; then
+  export HOMEBREW_PREFIX=/usr/local
+fi
+if [[ -n $HOMEBREW_PREFIX ]]; then
   export HOMEBREW_NO_ANALYTICS=1
   export HOMEBREW_NO_ENV_HINTS=1
 fi
@@ -49,3 +56,9 @@ export SOPS_AGE_KEY_FILE="$XDG_CONFIG_HOME/sops/age/keys.txt"
 
 # ---------- PATH (also re-run from .zprofile, see path.zsh) ----------
 source "$ZDOTDIR/path.zsh"
+
+# ---------- GPG ssh-agent socket (needs PATH, so after path.zsh) ----------
+# Ask gpgconf: ~/.gnupg on macOS, /run/user/$UID/gnupg on systemd Linux.
+if command -v gpgconf >/dev/null 2>&1; then
+  export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+fi

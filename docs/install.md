@@ -72,8 +72,9 @@ there or override the variable.
 
 ## Platform notes
 
-- **macOS:** Homebrew is a user-local install at `~/.homebrew` (no sudo). The zsh config
-  detects it; it does not assume `/opt/homebrew`.
+- **macOS:** Homebrew is detected in order: user-local `~/.homebrew` (casks go to
+  `~/Applications`), then `/opt/homebrew` (Apple Silicon), then `/usr/local` (Intel).
+  The zsh config and `gpg-agent.conf` template both follow the same order.
 - **Debian / WSL:** `bat` and `fd` install as `batcat` / `fdfind`; symlink them into
   `~/.local/bin` as `bat` / `fd`.
 - **Clipboard in tmux** uses OSC 52. The terminal must allow it (iTerm2: Settings >

@@ -78,12 +78,19 @@ echo "<PRIMARY_FINGERPRINT>:6:" | gpg --import-ownertrust   # 6 = ultimate
 
 ### 3. Expose the authentication subkey to SSH
 
-Add the keygrip of the `[A]` subkey from the listing above:
+If the private repo has `gnupg/sshcontrol`, `chezmoi apply` symlinks
+`~/.gnupg/sshcontrol` to it and there is nothing to do. Otherwise, add the keygrip of the
+`[A]` subkey from the listing above to that file (so other machines get it), or to
+`~/.gnupg/sshcontrol` on this machine only:
 
 ```bash
-echo "<KEYGRIP_OF_AUTH_SUBKEY>" >> ~/.gnupg/sshcontrol
+echo "<KEYGRIP_OF_AUTH_SUBKEY>" >> ~/.local/share/dotfiles-private/gnupg/sshcontrol
+chezmoi apply ~/.gnupg/sshcontrol
+gpg-connect-agent reloadagent /bye
 ssh-add -L   # should print an ssh-ed25519 key
 ```
+
+If `~/.gnupg/sshcontrol` already exists as a regular file, move it aside first.
 
 ### 4. Configure git
 

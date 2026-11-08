@@ -19,3 +19,8 @@ system
 .local/bin/dotfiles-sync-check
 .config/systemd/user/dotfiles-*
 {{- end }}
+
+{{- /* sshcontrol is a symlink into the private repo; skip it on machines without one */}}
+{{- if not (stat (joinPath .chezmoi.homeDir ".local/share/dotfiles-private/gnupg/sshcontrol")) }}
+.gnupg/sshcontrol
+{{- end }}

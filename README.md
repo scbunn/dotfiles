@@ -43,12 +43,14 @@ repo and replace that with your own fork.
 
 ## The private repo
 
-The public config reads two things from `~/.local/share/dotfiles-private`:
+The public config reads these from `~/.local/share/dotfiles-private`. That path can be
+a symlink to a checkout somewhere else (for example `~/sources/dotfiles-private`):
 
 | Path | Read by | Holds |
 |------|---------|-------|
 | `gitconfig` | `~/.config/git/config` (`[include]`) | `[user]` name, email, signing key; `includeIf` rules; URL rewrites |
 | `zsh/*.zsh` | end of `.zshrc` | per-machine environment variables, aliases, functions |
+| `gnupg/sshcontrol` (optional) | gpg-agent, via a chezmoi symlink at `~/.gnupg/sshcontrol` | keygrips of GPG subkeys used as SSH keys |
 
 A minimal one:
 
