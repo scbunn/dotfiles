@@ -17,6 +17,9 @@ local gamingApps = "^(steam_app.*|gamescope)$"
 local gamingWorkspace = "name:G" -- must match the rule in workspaces.lua
 
 hl.window_rule({ match = { content = "game" }, workspace = gamingWorkspace })
+-- Anything on the games workspace blocks idle lock/screen-off: controller input
+-- doesn't count as activity, and not every game inhibits idle itself.
+hl.window_rule({ match = { workspace = gamingWorkspace }, idle_inhibit = "always" })
 hl.window_rule({ match = { xdg_tag = "^(.*game.*)$" }, workspace = gamingWorkspace, fullscreen_state = 2, content = "game", sync_fullscreen = true })
 hl.window_rule({ match = { class = gamingApps }, workspace = gamingWorkspace })
 hl.window_rule({ match = { class = "^(steam)$" }, workspace = gamingWorkspace }) -- Steam client and its popups
